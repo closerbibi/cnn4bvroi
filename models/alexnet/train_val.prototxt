@@ -10,10 +10,10 @@ layer {
   transform_param {
     mirror: true
     crop_size: 227
-    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
+    mean_file: "/home/closerbibi/bin/cnn/data/ilsvrc12/imagenet_mean.binaryproto"
   }
   data_param {
-    source: "examples/imagenet/ilsvrc12_train_lmdb"
+    source: "/home/closerbibi/bin/cnn/data/lmdb/test_lmdb"
     batch_size: 256
     backend: LMDB
   }
@@ -29,11 +29,11 @@ layer {
   transform_param {
     mirror: false
     crop_size: 227
-    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
+    mean_file: "/home/closerbibi/bin/cnn/data/ilsvrc12/imagenet_mean.binaryproto"
   }
   data_param {
-    source: "examples/imagenet/ilsvrc12_val_lmdb"
-    batch_size: 50
+    source: "/home/closerbibi/bin/cnn/data/lmdb/test_lmdb"
+    batch_size: 1 #50
     backend: LMDB
   }
 }
@@ -381,4 +381,10 @@ layer {
   bottom: "fc8"
   bottom: "label"
   top: "loss"
+}
+layer {
+  name: "prob"
+  type: "Softmax"
+  bottom: "fc8"
+  top: "prob"
 }

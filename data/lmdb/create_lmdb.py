@@ -29,16 +29,17 @@ def loadtoXY4voxeldata(option, classdict):
     return X, Y, N
 def loadtoXY(option, classdict):
     # Let's pretend this is interesting data
-    N = 100#get_N(option)
-    X = np.zeros((N, 3, 256, 256), dtype=np.float64) # from uint8 turn into int64
-    Y = np.zeros(N, dtype=np.int64)
     if option == 'train':
         path = train_path
     elif option == 'test':
         path = test_path
     filelist = np.sort(os.listdir(path))
+    N = 1#len(filelist)#get_N(option)
+    X = np.zeros((N, 3, 256, 256), dtype=np.uint8) # from uint8 turn into int64
+    Y = np.zeros(N, dtype=np.int64)
     # loading label
-    text_file = test_path + '/../ILSVRC2012_validation_ground_truth.txt'
+    #text_file = test_path + '/../ILSVRC2012_validation_ground_truth.txt'
+    text_file = '../../caffe/examples/images/fuck.txt'
     lines = [line.rstrip('\n') for line in open(text_file)]
     lines = map(int, lines)
     Y = np.asarray(lines)[:N]
@@ -51,10 +52,10 @@ def loadtoXY(option, classdict):
         tmpX = np.swapaxes(tmpX,0,2)
         tmpX = np.swapaxes(tmpX,1,2)
         X[count] = tmpX
+        print 'file %s done' % fname
         count += 1
         if count == N:
             break
-        print 'file %s done' % fname
     return X, Y, N
 
 def creat_lmdb(option, X, Y, N):
@@ -83,15 +84,16 @@ def creat_lmdb(option, X, Y, N):
 
 #train_path = '/home/closerbibi/3D/understanding/rankpooling/python/train_dir'
 #test_path = '/home/closerbibi/3D/understanding/rankpooling/python/test_dir'
-test_path = '../../../../dataset/imagenet/ILSVRC2012_img_val'
+#test_path = '../../../../dataset/imagenet/ILSVRC2012_img_val'
+test_path = '../../caffe/examples/images'
 
 
-if os.path.exists('train_dir'):
-    shutil.rmtree('train_dir')
-if os.path.exists('test_dir'):
-    shutil.rmtree('test_dir')
-os.makedirs('train_dir')
-os.makedirs('test_dir')
+if os.path.exists('train_lmdb'):
+    shutil.rmtree('train_lmdb')
+if os.path.exists('test_lmdb'):
+    shutil.rmtree('test_lmdb')
+os.makedirs('train_lmdb')
+os.makedirs('test_lmdb')
 
 
 classdict = {

@@ -1,47 +1,15 @@
 name: "AlexNet"
 layer {
   name: "data"
-  type: "Data"
+  type: "Input"
   top: "data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-    mirror: true
-    crop_size: 227
-    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
-  }
-  data_param {
-    source: "examples/imagenet/ilsvrc12_train_lmdb"
-    batch_size: 256
-    backend: LMDB
-  }
+  input_param { shape: { dim: 10 dim: 3 dim: 227 dim: 227 } }
 }
 layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  top: "label"
-  include {
-    phase: TEST
-  }
-  transform_param {
-    mirror: false
-    crop_size: 227
-    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
-  }
-  data_param {
-    source: "examples/imagenet/ilsvrc12_val_lmdb"
-    batch_size: 50
-    backend: LMDB
-  }
-}
-layer {
-  name: "conv1"
+  name: "my_conv1"
   type: "Convolution"
   bottom: "data"
-  top: "conv1"
+  top: "my_conv1"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -53,15 +21,7 @@ layer {
   convolution_param {
     num_output: 96
     kernel_size: 11
-    stride: 4
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
+    stride: 1
   }
 }
 layer {
@@ -82,14 +42,14 @@ layer {
   }
 }
 layer {
-  name: "pool1"
+  name: "my_pool1"
   type: "Pooling"
   bottom: "norm1"
-  top: "pool1"
+  top: "my_pool1"
   pooling_param {
     pool: MAX
     kernel_size: 3
-    stride: 2
+    stride: 1
   }
 }
 layer {
@@ -110,14 +70,6 @@ layer {
     pad: 2
     kernel_size: 5
     group: 2
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0.1
-    }
   }
 }
 layer {
@@ -138,14 +90,14 @@ layer {
   }
 }
 layer {
-  name: "pool2"
+  name: "my_pool2"
   type: "Pooling"
   bottom: "norm2"
-  top: "pool2"
+  top: "my_pool2"
   pooling_param {
     pool: MAX
     kernel_size: 3
-    stride: 2
+    stride: 1
   }
 }
 layer {
@@ -165,14 +117,6 @@ layer {
     num_output: 384
     pad: 1
     kernel_size: 3
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
   }
 }
 layer {
@@ -199,14 +143,6 @@ layer {
     pad: 1
     kernel_size: 3
     group: 2
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0.1
-    }
   }
 }
 layer {
@@ -233,14 +169,6 @@ layer {
     pad: 1
     kernel_size: 3
     group: 2
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0.1
-    }
   }
 }
 layer {
@@ -250,14 +178,14 @@ layer {
   top: "conv5"
 }
 layer {
-  name: "pool5"
+  name: "my_pool5"
   type: "Pooling"
   bottom: "conv5"
-  top: "pool5"
+  top: "my_pool5"
   pooling_param {
     pool: MAX
     kernel_size: 3
-    stride: 2
+    stride: 1
   }
 }
 layer {
@@ -275,14 +203,6 @@ layer {
   }
   inner_product_param {
     num_output: 4096
-    weight_filler {
-      type: "gaussian"
-      std: 0.005
-    }
-    bias_filler {
-      type: "constant"
-      value: 0.1
-    }
   }
 }
 layer {
@@ -315,14 +235,6 @@ layer {
   }
   inner_product_param {
     num_output: 4096
-    weight_filler {
-      type: "gaussian"
-      std: 0.005
-    }
-    bias_filler {
-      type: "constant"
-      value: 0.1
-    }
   }
 }
 layer {
@@ -355,30 +267,11 @@ layer {
   }
   inner_product_param {
     num_output: 1000
-    weight_filler {
-      type: "gaussian"
-      std: 0.01
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
   }
 }
 layer {
-  name: "accuracy"
-  type: "Accuracy"
+  name: "prob"
+  type: "Softmax"
   bottom: "fc8"
-  bottom: "label"
-  top: "accuracy"
-  include {
-    phase: TEST
-  }
-}
-layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
-  bottom: "fc8"
-  bottom: "label"
-  top: "loss"
+  top: "prob"
 }

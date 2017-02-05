@@ -1,6 +1,6 @@
 name: "VGG_ILSVRC_16_layers"
 input: "data"
-input_dim: 10
+input_dim: 1 #10
 input_dim: 3
 input_dim: 224
 input_dim: 224
@@ -46,7 +46,7 @@ layers {
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 1
+    stride: 2
   }
 }
 layers {
@@ -91,7 +91,7 @@ layers {
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 1
+    stride: 2
   }
 }
 layers {
@@ -153,7 +153,7 @@ layers {
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 1
+    stride: 2
   }
 }
 layers {
@@ -215,7 +215,7 @@ layers {
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 1
+    stride: 2
   }
 }
 layers {
@@ -277,7 +277,7 @@ layers {
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 1
+    stride: 2
   }
 }
 layers {
