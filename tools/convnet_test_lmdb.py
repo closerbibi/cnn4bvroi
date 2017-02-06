@@ -30,6 +30,10 @@ if __name__ == "__main__":
     lmdb_txn = lmdb_env.begin()
     lmdb_cursor = lmdb_txn.cursor()
 
+    # load the mean ImageNet image (as distributed with Caffe) for subtraction
+    mu = np.load('data/ilsvrc12/ilsvrc_2012_mean.npy')
+    mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
+    print 'mean-subtracted values:', zip('BGR', mu)
     for key, value in lmdb_cursor:
         datum = caffe.proto.caffe_pb2.Datum()
         datum.ParseFromString(value)
@@ -50,10 +54,6 @@ if __name__ == "__main__":
         net.blobs['data'].reshape(1,        # batch size
                                   3,         # 3-channel (BGR) images
                                   224, 224)  # image size is 227x227
-        # load the mean ImageNet image (as distributed with Caffe) for subtraction
-        mu = np.load('data/ilsvrc12/ilsvrc_2012_mean.npy')
-        mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
-        print 'mean-subtracted values:', zip('BGR', mu)
         # create transformer for the input called 'data'
         transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
         transformer.set_transpose('data', (2,0,1))  # move image channels to outermost dimension
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
         # copy the image data into the memory allocated for the net
         net.blobs['data'].data[...] = transformed_image
-
+        
         pdb.set_trace()
         ### perform classification
         out = net.forward()
