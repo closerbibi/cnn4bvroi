@@ -18,18 +18,23 @@ sys.path.insert(0, caffe_root + 'python')
 import caffe
 # If you get "No module named _caffe", either you have not built pycaffe or you have the wrong path.
 import os
-if os.path.isfile(caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'):
-    print 'CaffeNet found.'
-else:
-    print 'Downloading pre-trained CaffeNet model...'
-    #!../scripts/download_model_binary.py ../models/bvlc_reference_caffenet
 #caffe.set_mode_cpu()
 caffe.set_device(0)  # if we have multiple GPUs, pick the first one
 caffe.set_mode_gpu()
 
-model_def = caffe_root + 'models/bvlc_reference_caffenet/deploy.prototxt'
-model_weights = caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'
+#model_def = caffe_root + 'models/bvlc_reference_caffenet/deploy.prototxt'
+#model_weights = caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'
 
+model_def = 'models/vgg/VGG_ILSVRC_16_layers_deploy.prototxt'
+
+#model_def = 'models/vgg/vgg_train_val.prototxt'
+model_weights = 'models/vgg/VGG_ILSVRC_16_layers.caffemodel'
+
+if os.path.isfile(model_weights):
+    print 'CaffeNet found.'
+else:
+    print 'Downloading pre-trained CaffeNet model...'
+    #!../scripts/download_model_binary.py ../models/bvlc_reference_caffenet
 net = caffe.Net(model_def,      # defines the structure of the model
                 model_weights,  # contains the trained weights
                 caffe.TEST)     # use test mode (e.g., don't perform dropout)
@@ -47,37 +52,40 @@ transformer.set_mean('data', mu)            # subtract the dataset-mean value in
 transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
 transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
 
-# set the size of the input (we can skip this if we're happy
-#  with the default; we can also change it later, e.g., for different batch sizes)
-net.blobs['data'].reshape(50,        # batch size
-                          3,         # 3-channel (BGR) images
-                          227, 227)  # image size is 227x227
+for k in xrange(5):
+	# set the size of the input (we can skip this if we're happy
+	#  with the default; we can also change it later, e.g., for different batch sizes)
+	net.blobs['data'].reshape(50,        # batch size
+				  3,         # 3-channel (BGR) images
+				  224, 224)  # image size is 227x227
+	image = caffe.io.load_image('../../dataset/ILSVRC2012_img_val/ILSVRC2012_val_%08d.JPEG' % (k+1))
+	transformed_image = transformer.preprocess('data', image)
+	#plt.imshow(image)
 
-image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
-transformed_image = transformer.preprocess('data', image)
-#plt.imshow(image)
+	# copy the image data into the memory allocated for the net
+	net.blobs['data'].data[...] = transformed_image
 
-# copy the image data into the memory allocated for the net
-net.blobs['data'].data[...] = transformed_image
+	### perform classification
+	output = net.forward()
 
-### perform classification
-output = net.forward()
+	output_prob = output['prob'][0]  # the output probability vector for the first image in the batch
 
-output_prob = output['prob'][0]  # the output probability vector for the first image in the batch
+	print 'predicted class is:', output_prob.argmax()
 
-print 'predicted class is:', output_prob.argmax()
+	# load ImageNet labels
+	labels_file = caffe_root + 'data/ilsvrc12/synset_words.txt'
+	if not os.path.exists(labels_file):
+	    print 'ehhh...'#!../data/ilsvrc12/get_ilsvrc_aux.sh
+	    
+	labels = np.loadtxt(labels_file, str, delimiter='\t')
 
-# load ImageNet labels
-labels_file = caffe_root + 'data/ilsvrc12/synset_words.txt'
-if not os.path.exists(labels_file):
-    print 'ehhh...'#!../data/ilsvrc12/get_ilsvrc_aux.sh
-    
-labels = np.loadtxt(labels_file, str, delimiter='\t')
+	print 'output label:', labels[output_prob.argmax()]
 
-print 'output label:', labels[output_prob.argmax()]
+	# sort top five predictions from softmax output
+	top_inds = output_prob.argsort()[::-1][:5]  # reverse sort and take five largest items
 
-# sort top five predictions from softmax output
-top_inds = output_prob.argsort()[::-1][:5]  # reverse sort and take five largest items
-
-print 'probabilities and labels:'
-zip(output_prob[top_inds], labels[top_inds])
+	print 'probabilities and labels:'
+	zip(output_prob[top_inds], labels[top_inds])
+	print('image: %d' % (k+1))
+	print output_prob[top_inds]
+	print labels[top_inds], '\n'
