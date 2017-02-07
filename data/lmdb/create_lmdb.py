@@ -34,12 +34,12 @@ def loadtoXY(option, classdict):
     elif option == 'test':
         path = test_path
     filelist = np.sort(os.listdir(path))
-    N = 1#len(filelist)#get_N(option)
+    N = 10#len(filelist)#get_N(option)
     X = np.zeros((N, 3, 256, 256), dtype=np.uint8) # from uint8 turn into int64
     Y = np.zeros(N, dtype=np.int64)
     # loading label
-    #text_file = test_path + '/../ILSVRC2012_validation_ground_truth.txt'
-    text_file = '../../caffe/examples/images/fuck.txt'
+    text_file = 'ILSVRC2012_validation_ground_truth.txt'
+    #text_file = '../../caffe/examples/images/fuck.txt'
     lines = [line.rstrip('\n') for line in open(text_file)]
     lines = map(int, lines)
     Y = np.asarray(lines)[:N]
@@ -84,8 +84,8 @@ def creat_lmdb(option, X, Y, N):
 
 #train_path = '/home/closerbibi/3D/understanding/rankpooling/python/train_dir'
 #test_path = '/home/closerbibi/3D/understanding/rankpooling/python/test_dir'
-#test_path = '../../../../dataset/imagenet/ILSVRC2012_img_val'
-test_path = '../../caffe/examples/images'
+test_path = '../../../../dataset/ILSVRC2012_img_val'
+#test_path = '../../caffe/examples/images'
 
 
 if os.path.exists('train_lmdb'):

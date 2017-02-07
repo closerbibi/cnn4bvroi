@@ -2,6 +2,8 @@
 import pdb
 import numpy as np
 import matplotlib.pyplot as plt
+import lmdb
+import argparse
 # display plots in this notebook
 #%matplotlib inline
 
@@ -49,16 +51,32 @@ transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
 
 transformer.set_transpose('data', (2,0,1))  # move image channels to outermost dimension
 transformer.set_mean('data', mu)            # subtract the dataset-mean value in each channel
-transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
-transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
+#transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
+#transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
 
-for k in xrange(5):
+# load lmdb file
+lmdb_env = lmdb.open('data/lmdb/test_lmdb')
+lmdb_txn = lmdb_env.begin()
+lmdb_cursor = lmdb_txn.cursor()
+
+k=0
+for key, value in lmdb_cursor:
 	# set the size of the input (we can skip this if we're happy
 	#  with the default; we can also change it later, e.g., for different batch sizes)
 	net.blobs['data'].reshape(50,        # batch size
 				  3,         # 3-channel (BGR) images
 				  224, 224)  # image size is 227x227
-	image = caffe.io.load_image('../../dataset/ILSVRC2012_img_val/ILSVRC2012_val_%08d.JPEG' % (k+1))
+	#image = caffe.io.load_image('../../dataset/ILSVRC2012_img_val/ILSVRC2012_val_%08d.JPEG' % (k+1))
+	datum = caffe.proto.caffe_pb2.Datum()
+	datum.ParseFromString(value)
+	label = int(datum.label)
+	image = caffe.io.datum_to_array(datum)
+	image = image.astype(np.uint8)
+
+	# transpose 1st time
+	image = np.swapaxes(image,0,2)
+	image = np.swapaxes(image,0,1) 
+
 	transformed_image = transformer.preprocess('data', image)
 	#plt.imshow(image)
 
@@ -89,3 +107,4 @@ for k in xrange(5):
 	print('image: %d' % (k+1))
 	print output_prob[top_inds]
 	print labels[top_inds], '\n'
+	k+=1
