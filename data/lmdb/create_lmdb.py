@@ -34,7 +34,7 @@ def loadtoXY(option, classdict):
     elif option == 'test':
         path = test_path
     filelist = np.sort(os.listdir(path))
-    N = 10#len(filelist)#get_N(option)
+    N = 1000#len(filelist)#get_N(option)
     X = np.zeros((N, 3, 256, 256), dtype=np.uint8) # from uint8 turn into int64
     Y = np.zeros(N, dtype=np.int64)
     # loading label

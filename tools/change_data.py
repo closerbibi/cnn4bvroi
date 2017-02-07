@@ -88,7 +88,7 @@ for key, value in lmdb_cursor:
 
 	output_prob = output['prob'][0]  # the output probability vector for the first image in the batch
 
-	print 'predicted class is:', output_prob.argmax()
+	#print 'predicted class is:', output_prob.argmax()
 
 	# load ImageNet labels
 	labels_file = caffe_root + 'data/ilsvrc12/synset_words.txt'
@@ -105,6 +105,6 @@ for key, value in lmdb_cursor:
 	print 'probabilities and labels:'
 	zip(output_prob[top_inds], labels[top_inds])
 	print('image: %d' % (k+1))
-	print output_prob[top_inds]
-	print labels[top_inds], '\n'
+	print output_prob[top_inds[0]]
+	#print labels[top_inds], '\n'
 	k+=1
